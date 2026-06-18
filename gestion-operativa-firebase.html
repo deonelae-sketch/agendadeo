@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gestión Operativa · Creditel</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#F0F2FF;min-height:100vh}
+input,select,textarea,button{font-family:'DM Sans',sans-serif}
+
+/* LOGIN */
+#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#2B3FE8;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}
+#login-box{background:#fff;border-radius:20px;padding:40px;width:100%;max-width:420px;text-align:center}
+#login-logo{width:64px;height:64px;background:#2B3FE8;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+#login-logo span{color:#F5C518;font-family:'Sora',sans-serif;font-weight:800;font-size:28px}
+#login-box h2{font-family:'Sora',sans-serif;font-weight:800;font-size:22px;color:#111;margin-bottom:4px}
+#login-box p{color:#9CA3AF;font-size:13px;margin-bottom:28px}
+.login-campo{margin-bottom:16px;text-align:left}
+.login-lbl{display:block;font-size:14px;font-weight:700;color:#555;margin-bottom:8px}
+.login-inp{width:100%;padding:16px 18px;border-radius:12px;border:2px solid #E5E7EB;font-size:17px;outline:none;background:#FAFAFA;color:#111}
+.login-inp:focus{border-color:#2B3FE8}
+#btn-login{width:100%;padding:18px;border-radius:12px;border:none;background:#2B3FE8;color:#fff;font-weight:800;font-size:18px;cursor:pointer;margin-top:8px}
+#login-error{color:#DC2626;font-size:14px;margin-top:12px;display:none}
+#login-loading{color:#9CA3AF;font-size:14px;margin-top:12px;display:none}
+
+/* APP */
+#app{display:none}
+#hdr{background:#2B3FE8;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(43,63,232,.3);flex-wrap:wrap;gap:10px}
+#hdr h1{color:#fff;font-family:'Sora',sans-serif;font-size:20px;font-weight:800}
+#hdr p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px}
+#hdr-right{display:flex;gap:10px;align-items:center}
+#btn-nuevo{background:#F5C518;color:#1a2060;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:14px;cursor:pointer}
+#btn-logout{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer}
+
+#filters{padding:14px 28px;background:#fff;border-bottom:1.5px solid #E5E7EB;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.fi{padding:9px 12px;border-radius:9px;border:1.5px solid #E5E7EB;font-size:14px;outline:none;background:#FAFAFA;color:#1F2937;min-width:160px}
+
+#board{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:24px 28px}
+.col{background:#F9FAFB;border-radius:14px;padding:14px}
+.col-p{border:2px solid #E5E7EB}
+.col-e{border:2px solid #C7D0FD}
+.col-l{border:2px solid #BBF7D0}
+.col-hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.col-dot{width:12px;height:12px;border-radius:50%}
+.col-tit{font-family:'Sora',sans-serif;font-weight:800;font-size:14px;color:#1F2937}
+.col-cnt{margin-left:auto;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:700;color:#fff}
+.empty{text-align:center;color:#D1D5DB;font-size:13px;padding:30px 0}
+.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);border:1.5px solid #F3F4F6;margin-bottom:10px;cursor:pointer}
+.card:hover{box-shadow:0 4px 16px rgba(43,63,232,.12)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:8px}
+.card-tit{font-weight:700;font-size:14px;color:#111827;line-height:1.35;flex:1}
+.card-del{background:none;border:none;color:#D1D5DB;cursor:pointer;font-size:18px;padding:0;line-height:1}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.tag-s{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#EEF2FF;color:#2B3FE8}
+.tag-r{font-size:11px;padding:2px 8px;border-radius:20px;background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB}
+.card-notes{font-size:12px;color:#9CA3AF;margin:0 0 8px;line-height:1.4}
+.card-acts{font-size:11px;color:#6B7280;margin-bottom:8px}
+.card-moves{display:flex;gap:6px;margin-top:4px}
+.btn-mv{font-size:11px;padding:3px 10px;border-radius:20px;background:transparent;cursor:pointer;font-weight:600}
+.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px}
+.b-ok{background:#DCFCE7;color:#16A34A}
+.b-warn{background:#FEF3C7;color:#D97706}
+.b-hoy{background:#FEF9C3;color:#CA8A04}
+.b-venc{background:#FEE2E2;color:#DC2626}
+
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);z-index:9999;display:none}
+#modal{background:#fff;border-radius:16px;width:90%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);margin:40px auto}
+#modal-hdr{background:#2B3FE8;padding:20px 24px 16px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center}
+#modal-hdr span{color:#fff;font-weight:800;font-size:16px;font-family:'Sora',sans-serif}
+#modal-hdr button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:20px;line-height:1}
+#modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.lbl{display:block;font-size:12px;font-weight:700;color:#6B7280;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.inp{width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid #E5E7EB;font-size:14px;outline:none;background:#FAFAFA;color:#1F2937}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.act-item{display:flex;align-items:center;gap:8px;background:#F1F5FF;border-radius:8px;padding:6px 10px;margin-bottom:4px}
+.act-item span{flex:1;font-size:13px}
+.act-item button{background:none;border:none;color:#DC2626;cursor:pointer;font-size:16px;padding:0}
+#modal-footer{padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end}
+.btn-c{padding:10px 20px;border-radius:10px;border:1.5px solid #D1D5DB;background:#fff;cursor:pointer;font-weight:600;font-size:14px}
+.btn-s{padding:10px 24px;border-radius:10px;border:none;background:#2B3FE8;color:#fff;cursor:pointer;font-weight:700;font-size:14px}
+
+@media(max-width:800px){#board{grid-template-columns:1fr}#filters{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div id="login-box">
+    <div id="login-logo"><span>c</span></div>
+    <h2>Gestión Operativa</h2>
+    <p>Reuniones semanales · Creditel</p>
+    <div class="login-campo">
+      <label class="login-lbl">Email</label>
+      <input id="login-email" class="login-inp" type="email" placeholder="tu@email.com"/>
+    </div>
+    <div class="login-campo">
+      <label class="login-lbl">Contraseña</label>
+      <input id="login-pass" class="login-inp" type="password" placeholder="••••••••"/>
+    </div>
+    <button id="btn-login">Ingresar</button>
+    <div id="login-error">Email o contraseña incorrectos</div>
+    <div id="login-loading">Ingresando...</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="hdr">
+    <div>
+      <h1>⚡ Gestión Operativa</h1>
+      <p>Reuniones semanales · Creditel</p>
+    </div>
+    <div id="hdr-right">
+      <button id="btn-nuevo">+ Nuevo tema</button>
+      <button id="btn-logout">🚪 Salir</button>
+    </div>
+  </div>
+
+  <div id="filters">
+    <input id="s-buscar" class="fi" placeholder="🔍 Buscar..."/>
+    <select id="s-suc" class="fi">
+      <option value="">Todas las sucursales</option>
+      <option>Carmelo</option>
+      <option>Mercedes</option>
+      <option>Fray Bentos</option>
+      <option>Colonia</option>
+      <option>Otras</option>
+    </select>
+    <select id="s-sem" class="fi"><option value="">Todas las semanas</option></select>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center">
+      <span style="font-size:13px;font-weight:700;color:#6B7280">Pendiente: <span id="cnt-p" style="background:#6B7280;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px">0</span></span>
+      <span style="font-size:13px;font-weight:700;color:#2B3FE8">En curso: <span id="cnt-e" style="background:#2B3FE8;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px">0</span></span>
+      <span style="font-size:13px;font-weight:700;color:#16A34A">Listo: <span id="cnt-l" style="background:#16A34A;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px">0</span></span>
+    </div>
+  </div>
+
+  <div id="board">
+    <div class="col col-p">
+      <div class="col-hdr"><div class="col-dot" style="background:#6B7280"></div><span class="col-tit">Pendiente</span><span class="col-cnt" id="b-p" style="background:#6B7280">0</span></div>
+      <div id="cards-pendiente"></div>
+    </div>
+    <div class="col col-e">
+      <div class="col-hdr"><div class="col-dot" style="background:#2B3FE8"></div><span class="col-tit">En curso</span><span class="col-cnt" id="b-e" style="background:#2B3FE8">0</span></div>
+      <div id="cards-en_curso"></div>
+    </div>
+    <div class="col col-l">
+      <div class="col-hdr"><div class="col-dot" style="background:#16A34A"></div><span class="col-tit">Listo</span><span class="col-cnt" id="b-l" style="background:#16A34A">0</span></div>
+      <div id="cards-listo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="overlay">
+  <div id="modal">
+    <div id="modal-hdr">
+      <span id="modal-tit">Nuevo tema</span>
+      <button id="modal-cerrar">×</button>
+    </div>
+    <div id="modal-body">
+      <div>
+        <label class="lbl">Título del tema *</label>
+        <input id="f-titulo" class="inp" placeholder="Ej: Revisión de procesos de caja"/>
+      </div>
+      <div class="g2">
+        <div>
+          <label class="lbl">Sucursal</label>
+          <select id="f-suc" class="inp">
+            <option>Carmelo</option>
+            <option>Mercedes</option>
+            <option>Fray Bentos</option>
+            <option>Colonia</option>
+            <option>Otras</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Responsable</label>
+          <input id="f-resp" class="inp" placeholder="Nombre"/>
+        </div>
+      </div>
+      <div class="g2">
+        <div>
+          <label class="lbl">Fecha de inicio</label>
+          <input id="f-ini" type="date" class="inp"/>
+        </div>
+        <div>
+          <label class="lbl">Fecha límite</label>
+          <input id="f-lim" type="date" class="inp"/>
+        </div>
+      </div>
+      <div>
+        <label class="lbl">Semana de reunión</label>
+        <input id="f-sem" type="date" class="inp"/>
+      </div>
+      <div>
+        <label class="lbl">Estado</label>
+        <select id="f-est" class="inp">
+          <option value="pendiente">Pendiente</option>
+          <option value="en_curso">En curso</option>
+          <option value="listo">Listo</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Notas / Comentarios</label>
+        <textarea id="f-notas" class="inp" style="height:80px;resize:vertical" placeholder="Detalles, contexto..."></textarea>
+      </div>
+      <div>
+        <label class="lbl">Actividades</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input id="f-act" class="inp" style="flex:1" placeholder="Escribí una actividad y presioná Enter"/>
+          <button id="btn-addact" style="background:#2B3FE8;color:#fff;border:none;border-radius:8px;padding:0 14px;cursor:pointer;font-size:18px;font-weight:700">+</button>
+        </div>
+        <div id="act-list"></div>
+      </div>
+    </div>
+    <div id="modal-footer">
+      <button class="btn-c" id="btn-cancelar">Cancelar</button>
+      <button class="btn-s" id="btn-guardar">Crear tema</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyCllsczko4hNM2K7ksrG_wf6hsjQ4ooNbg",
+  authDomain: "agenda-nico-b737f.firebaseapp.com",
+  databaseURL: "https://agenda-nico-b737f-default-rtdb.firebaseio.com",
+  projectId: "agenda-nico-b737f",
+  storageBucket: "agenda-nico-b737f.firebasestorage.app",
+  messagingSenderId: "777035241808",
+  appId: "1:777035241808:web:457ebf07de197740357455"
+};
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.database();
+
+// LOGIN
+document.getElementById("btn-login").onclick = function(){
+  var email = document.getElementById("login-email").value.trim();
+  var pass = document.getElementById("login-pass").value;
+  document.getElementById("login-error").style.display="none";
+  document.getElementById("login-loading").style.display="block";
+  auth.signInWithEmailAndPassword(email, pass).catch(function(){
+    document.getElementById("login-error").style.display="block";
+    document.getElementById("login-loading").style.display="none";
+  });
+};
+document.getElementById("login-pass").onkeydown = function(e){ if(e.key==="Enter") document.getElementById("btn-login").click(); };
+document.getElementById("btn-logout").onclick = function(){ auth.signOut(); };
+
+auth.onAuthStateChanged(function(user){
+  if(user){
+    document.getElementById("login-screen").style.display="none";
+    document.getElementById("app").style.display="block";
+    cargarDatos();
+  } else {
+    document.getElementById("login-screen").style.display="flex";
+    document.getElementById("app").style.display="none";
+  }
+});
+
+// DATOS
+var cards=[], editId=null, tmpActs=[];
+
+function cargarDatos(){
+  db.ref("creditel_temas").on("value", function(snap){
+    cards=[];
+    snap.forEach(function(c){var d=c.val();d.id=c.key;cards.push(d);});
+    render();
+  });
+}
+
+function fbSave(d){
+  if(d.id){ db.ref("creditel_temas/"+d.id).set(d); }
+  else { var ref=db.ref("creditel_temas").push(); d.id=ref.key; ref.set(d); }
+}
+function fbDel(id){ db.ref("creditel_temas/"+id).remove(); }
+
+function hoy(){ return new Date().toISOString().split("T")[0]; }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function dias(f){
+  var h=new Date(); h.setHours(0,0,0,0);
+  return Math.ceil((new Date(f+"T00:00:00")-h)/86400000);
+}
+function badge(f,st){
+  if(!f||st==="listo") return "";
+  var d=dias(f), cls, txt;
+  if(d<0){cls="b-venc";txt="Vencido "+Math.abs(d)+"d";}
+  else if(d===0){cls="b-hoy";txt="Vence hoy";}
+  else if(d<=2){cls="b-warn";txt=d+"d restantes";}
+  else{cls="b-ok";txt=d+"d restantes";}
+  return '<span class="badge '+cls+'">'+txt+'</span>';
+}
+function semLbl(ds){
+  var d=new Date(ds+"T00:00:00");
+  return "Semana del "+String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+
+function filtrar(){
+  var q=document.getElementById("s-buscar").value.toLowerCase();
+  var suc=document.getElementById("s-suc").value;
+  var sem=document.getElementById("s-sem").value;
+  return cards.filter(function(c){
+    if(suc&&c.sucursal!==suc)return false;
+    if(sem&&c.semana!==sem)return false;
+    if(q&&c.titulo.toLowerCase().indexOf(q)<0&&(c.responsable||"").toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+}
+
+function render(){
+  var fs=filtrar();
+  var selSem=document.getElementById("s-sem").value;
+  var sems=[]; cards.forEach(function(c){if(c.semana&&sems.indexOf(c.semana)<0)sems.push(c.semana);}); sems.sort().reverse();
+  var semHtml='<option value="">Todas las semanas</option>';
+  sems.forEach(function(s){semHtml+='<option value="'+s+'"'+(s===selSem?' selected':'')+'>'+semLbl(s)+'</option>';});
+  document.getElementById("s-sem").innerHTML=semHtml;
+
+  var cols={pendiente:{color:"#6B7280",lbl:"Pendiente",bp:"b-p",cnt:"cnt-p"},en_curso:{color:"#2B3FE8",lbl:"En curso",bp:"b-e",cnt:"cnt-e"},listo:{color:"#16A34A",lbl:"Listo",bp:"b-l",cnt:"cnt-l"}};
+  var colIds=["pendiente","en_curso","listo"];
+
+  colIds.forEach(function(col){
+    var cc=fs.filter(function(c){return c.status===col;});
+    document.getElementById(cols[col].bp).textContent=cc.length;
+    document.getElementById(cols[col].cnt).textContent=cc.length;
+    var html="";
+    if(!cc.length){html='<div class="empty">Sin temas</div>';}
+    else{
+      cc.forEach(function(card){
+        var mvs="";
+        colIds.filter(function(c){return c!==col;}).forEach(function(c){
+          mvs+='<button class="btn-mv" style="border:1.5px solid '+cols[c].color+';color:'+cols[c].color+'" id="mv-'+card.id+'-'+c+'">→ '+cols[c].lbl+'</button>';
+        });
+        html+='<div class="card" id="card-'+card.id+'">';
+        html+='<div class="card-top"><span class="card-tit">'+esc(card.titulo)+'</span>';
+        html+='<button class="card-del" id="del-'+card.id+'">×</button></div>';
+        html+='<div class="tags"><span class="tag-s">'+esc(card.sucursal)+'</span>';
+        if(card.responsable)html+='<span class="tag-r">👤 '+esc(card.responsable)+'</span>';
+        html+=badge(card.fechaLimite,card.status)+'</div>';
+        if(card.notas)html+='<p class="card-notes">'+esc(card.notas)+'</p>';
+        if(card.actividades&&card.actividades.length)html+='<div class="card-acts">📋 '+card.actividades.length+' actividad'+(card.actividades.length>1?'es':'')+'</div>';
+        html+='<div class="card-moves">'+mvs+'</div></div>';
+      });
+    }
+    document.getElementById("cards-"+col).innerHTML=html;
+
+    cc.forEach(function(card){
+      var delBtn=document.getElementById("del-"+card.id);
+      if(delBtn)delBtn.onclick=function(e){e.stopPropagation();if(!confirm("¿Eliminar este tema?"))return;fbDel(card.id);};
+      var cardEl=document.getElementById("card-"+card.id);
+      if(cardEl)cardEl.onclick=function(){abrirEdit(card.id);};
+      colIds.filter(function(c){return c!==col;}).forEach(function(c){
+        var mvBtn=document.getElementById("mv-"+card.id+"-"+c);
+        if(mvBtn)mvBtn.onclick=function(e){e.stopPropagation();var upd=Object.assign({},card,{status:c});fbSave(upd);};
+      });
+    });
+  });
+}
+
+function cerrar(){ document.getElementById("overlay").style.display="none"; }
+
+function abrirNuevo(){
+  editId=null; tmpActs=[];
+  document.getElementById("modal-tit").textContent="Nuevo tema";
+  document.getElementById("btn-guardar").textContent="Crear tema";
+  document.getElementById("f-titulo").value="";
+  document.getElementById("f-suc").value="Carmelo";
+  document.getElementById("f-resp").value="";
+  document.getElementById("f-ini").value=hoy();
+  document.getElementById("f-lim").value="";
+  document.getElementById("f-sem").value=hoy();
+  document.getElementById("f-est").value="pendiente";
+  document.getElementById("f-notas").value="";
+  document.getElementById("f-act").value="";
+  renderActs();
+  document.getElementById("overlay").style.display="block";
+}
+
+function abrirEdit(id){
+  var c=cards.find(function(x){return x.id===id;});
+  if(!c)return;
+  editId=c.id; tmpActs=(c.actividades||[]).slice();
+  document.getElementById("modal-tit").textContent="Editar tema";
+  document.getElementById("btn-guardar").textContent="Guardar cambios";
+  document.getElementById("f-titulo").value=c.titulo||"";
+  document.getElementById("f-suc").value=c.sucursal||"Carmelo";
+  document.getElementById("f-resp").value=c.responsable||"";
+  document.getElementById("f-ini").value=c.fechaInicio||"";
+  document.getElementById("f-lim").value=c.fechaLimite||"";
+  document.getElementById("f-sem").value=c.semana||hoy();
+  document.getElementById("f-est").value=c.status||"pendiente";
+  document.getElementById("f-notas").value=c.notas||"";
+  document.getElementById("f-act").value="";
+  renderActs();
+  document.getElementById("overlay").style.display="block";
+}
+
+function renderActs(){
+  var h="";
+  tmpActs.forEach(function(a,i){h+='<div class="act-item"><span>• '+esc(a)+'</span><button id="qact-'+i+'">×</button></div>';});
+  document.getElementById("act-list").innerHTML=h;
+  tmpActs.forEach(function(a,i){var b=document.getElementById("qact-"+i);if(b)b.onclick=function(){tmpActs.splice(i,1);renderActs();};});
+}
+
+function addAct(){
+  var v=document.getElementById("f-act").value.trim();
+  if(!v)return;
+  tmpActs.push(v);
+  document.getElementById("f-act").value="";
+  renderActs();
+}
+
+function guardar(){
+  var t=document.getElementById("f-titulo").value.trim();
+  if(!t){alert("Por favor ingresá el título.");return;}
+  var d={
+    titulo:t,
+    sucursal:document.getElementById("f-suc").value,
+    responsable:document.getElementById("f-resp").value.trim(),
+    fechaInicio:document.getElementById("f-ini").value,
+    fechaLimite:document.getElementById("f-lim").value,
+    semana:document.getElementById("f-sem").value,
+    status:document.getElementById("f-est").value,
+    notas:document.getElementById("f-notas").value.trim(),
+    actividades:tmpActs.slice()
+  };
+  if(editId){d.id=editId;}
+  fbSave(d);cerrar();
+}
+
+document.getElementById("btn-nuevo").onclick=function(){abrirNuevo();};
+document.getElementById("btn-guardar").onclick=guardar;
+document.getElementById("btn-cancelar").onclick=cerrar;
+document.getElementById("modal-cerrar").onclick=cerrar;
+document.getElementById("btn-addact").onclick=addAct;
+document.getElementById("f-act").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();addAct();}};
+document.getElementById("s-buscar").oninput=render;
+document.getElementById("s-suc").onchange=render;
+document.getElementById("s-sem").onchange=render;
+document.getElementById("overlay").onclick=function(e){if(e.target.id==="overlay")cerrar();};
+</script>
+</body>
+</html>
